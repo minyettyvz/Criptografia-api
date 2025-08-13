@@ -1,18 +1,691 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
-  <title>Formulario API</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crear Nuevo Usuario - API</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=DM+Sans:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .form-container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+      padding: 40px;
+      width: 100%;
+      max-width: 480px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .form-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #0891b2, #8b5cf6);
+    }
+
+    .form-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .form-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 28px;
+      color: #1f2937;
+      margin-bottom: 8px;
+    }
+
+    .form-subtitle {
+      color: #6b7280;
+      font-size: 16px;
+      font-weight: 400;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 8px;
+      font-size: 14px;
+      letter-spacing: 0.025em;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 16px 20px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-size: 16px;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.3s ease;
+      background: #fafafa;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #0891b2;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.1);
+      transform: translateY(-1px);
+    }
+
+    .form-input:hover {
+      border-color: #d1d5db;
+      background: white;
+    }
+
+    .submit-button {
+      width: 100%;
+      background: linear-gradient(135deg, #0891b2, #0e7490);
+      color: white;
+      border: none;
+      padding: 18px 24px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: 'Space Grotesk', sans-serif;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .submit-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(8, 145, 178, 0.3);
+      background: linear-gradient(135deg, #0e7490, #155e75);
+    }
+
+    .submit-button:active {
+      transform: translateY(0);
+    }
+
+    .submit-button.loading {
+      pointer-events: none;
+      opacity: 0.8;
+    }
+
+    .loading-spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid transparent;
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 8px;
+    }
+
+    .submit-button.loading .loading-spinner {
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .success-message {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      padding: 16px 20px;
+      border-radius: 12px;
+      margin-top: 20px;
+      text-align: center;
+      font-weight: 500;
+      display: none;
+      animation: slideIn 0.5s ease;
+    }
+
+    .error-message {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+      padding: 16px 20px;
+      border-radius: 12px;
+      margin-top: 20px;
+      text-align: center;
+      font-weight: 500;
+      display: none;
+      animation: slideIn 0.5s ease;
+    }
+
+    /* <CHANGE> Agregando estilos para mostrar los datos del usuario creado */
+    .user-data-container {
+      background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+      border: 2px solid #cbd5e1;
+      border-radius: 16px;
+      padding: 24px;
+      margin-top: 24px;
+      display: none;
+      animation: slideIn 0.5s ease;
+    }
+
+    .user-data-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      font-size: 18px;
+      color: #1f2937;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .user-data-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: white;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-data-label {
+      font-weight: 500;
+      color: #374151;
+      font-size: 14px;
+    }
+
+    .user-data-value {
+      color: #0891b2;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .reset-button {
+      width: 100%;
+      background: linear-gradient(135deg, #6b7280, #4b5563);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 16px;
+    }
+
+    .reset-button:hover {
+      background: linear-gradient(135deg, #4b5563, #374151);
+      transform: translateY(-1px);
+    }
+
+    /* <CHANGE> Agregando estilos para el botón de ver usuarios */
+    .view-users-button {
+      width: 100%;
+      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+      color: white;
+      border: none;
+      padding: 18px 24px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: 'Space Grotesk', sans-serif;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      margin-top: 16px;
+    }
+
+    .view-users-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
+      background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    }
+
+    .view-users-button:active {
+      transform: translateY(0);
+    }
+
+    .view-users-button.loading {
+      pointer-events: none;
+      opacity: 0.8;
+    }
+
+    /* <CHANGE> Agregando estilos para la lista de usuarios */
+    .users-list-container {
+      background: linear-gradient(135deg, #fef3ff, #f3e8ff);
+      border: 2px solid #d8b4fe;
+      border-radius: 16px;
+      padding: 24px;
+      margin-top: 24px;
+      display: none;
+      animation: slideIn 0.5s ease;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .users-list-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      font-size: 18px;
+      color: #1f2937;
+      margin-bottom: 16px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .user-card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border-left: 4px solid #8b5cf6;
+      transition: all 0.3s ease;
+    }
+
+    .user-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .user-card:last-child {
+      margin-bottom: 0;
+    }
+
+    .user-name {
+      font-weight: 600;
+      color: #1f2937;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .user-email {
+      color: #8b5cf6;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .users-count {
+      background: #8b5cf6;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .hide-users-button {
+      width: 100%;
+      background: linear-gradient(135deg, #6b7280, #4b5563);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 16px;
+    }
+
+    .hide-users-button:hover {
+      background: linear-gradient(135deg, #4b5563, #374151);
+      transform: translateY(-1px);
+    }
+
+    .empty-users {
+      text-align: center;
+      color: #6b7280;
+      font-style: italic;
+      padding: 20px;
+    }
+
+    .reset-button {
+      width: 100%;
+      background: linear-gradient(135deg, #6b7280, #4b5563);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 16px;
+    }
+
+    .reset-button:hover {
+      background: linear-gradient(135deg, #4b5563, #374151);
+      transform: translateY(-1px);
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .form-footer {
+      text-align: center;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .form-footer-text {
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    .accent-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: #8b5cf6;
+      border-radius: 50%;
+      margin: 0 8px;
+    }
+
+    @media (max-width: 480px) {
+      .form-container {
+        padding: 24px;
+        margin: 10px;
+      }
+
+      .form-title {
+        font-size: 24px;
+      }
+    }
+  </style>
 </head>
+
 <body>
-  <h1>Formulario para la API</h1>
+  <div class="form-container">
+    <div class="form-header">
+      <h1 class="form-title">Gestión de Usuarios</h1>
+      <p class="form-subtitle">Crea nuevos usuarios y consulta los existentes</p>
+    </div>
 
-  <h2>Crear Usuario</h2>
-  <form action="/usuarios" method="post">
-    Nombre: <input type="text" name="nombre" required><br>
-    Email: <input type="email" name="email" required><br>
-    <button type="submit">Enviar</button>
-  </form>
+    <form id="userForm">
+      <div class="form-group">
+        <label for="nombre" class="form-label">Nombre Completo</label>
+        <input type="text" id="nombre" name="nombre" class="form-input" required
+          placeholder="Ingresa tu nombre completo">
+      </div>
 
+      <div class="form-group">
+        <label for="email" class="form-label">Correo Electrónico</label>
+        <input type="email" id="email" name="email" class="form-input" required placeholder="ejemplo@correo.com">
+      </div>
+
+      <button type="submit" class="submit-button" id="submitBtn">
+        <span class="loading-spinner"></span>
+        <span class="button-text">Crear Usuario</span>
+      </button>
+    </form>
+
+    <!-- <CHANGE> Agregando botón para ver usuarios -->
+    <button type="button" class="view-users-button" id="viewUsersBtn" onclick="loadUsers()">
+      <span class="loading-spinner"></span>
+      <span class="button-text">Ver Usuarios</span>
+    </button>
+
+    <div class="success-message" id="successMessage"></div>
+    <div class="error-message" id="errorMessage"></div>
+
+    <div class="user-data-container" id="userDataContainer">
+      <h3 class="user-data-title">✅ Usuario Creado Exitosamente</h3>
+      <div id="userDataContent"></div>
+      <button type="button" class="reset-button" onclick="resetForm()">Crear Otro Usuario</button>
+    </div>
+
+    <!-- <CHANGE> Agregando contenedor para mostrar lista de usuarios -->
+    <div class="users-list-container" id="usersListContainer">
+      <h3 class="users-list-title">
+        👥 Lista de Usuarios
+        <span class="users-count" id="usersCount">0</span>
+      </h3>
+      <div id="usersListContent"></div>
+      <button type="button" class="hide-users-button" onclick="hideUsers()">Ocultar Lista</button>
+    </div>
+
+    <div class="form-footer">
+      <p class="form-footer-text">
+        Formulario API
+        <span class="accent-dot"></span>
+        Ricardo Jose Mejia
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // <CHANGE> Agregando funcionalidad completa para enviar datos y mostrar respuesta
+    document.getElementById('userForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const submitBtn = document.getElementById('submitBtn');
+      const successMessage = document.getElementById('successMessage');
+      const errorMessage = document.getElementById('errorMessage');
+      const userDataContainer = document.getElementById('userDataContainer');
+
+      // Obtener datos del formulario
+      const formData = new FormData(this);
+      const userData = {
+        nombre: formData.get('nombre'),
+        email: formData.get('email')
+      };
+
+      // Mostrar estado de carga
+      submitBtn.classList.add('loading');
+      submitBtn.querySelector('.button-text').textContent = 'Creando Usuario...';
+
+      // Ocultar mensajes anteriores
+      successMessage.style.display = 'none';
+      errorMessage.style.display = 'none';
+      userDataContainer.style.display = 'none';
+
+      try {
+        // Enviar datos al API
+        const response = await fetch('/usuarios', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(userData)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          // Mostrar mensaje de éxito
+          successMessage.textContent = result.mensaje || 'Usuario creado exitosamente';
+          successMessage.style.display = 'block';
+
+          // Mostrar datos del usuario creado
+          displayUserData(result.usuario);
+
+          // Limpiar formulario
+          this.reset();
+        } else {
+          throw new Error(result.mensaje || 'Error al crear usuario');
+        }
+
+      } catch (error) {
+        console.error('Error:', error);
+        errorMessage.textContent = 'Error: ' + error.message;
+        errorMessage.style.display = 'block';
+      } finally {
+        // Restaurar botón
+        submitBtn.classList.remove('loading');
+        submitBtn.querySelector('.button-text').textContent = 'Crear Usuario';
+      }
+    });
+
+    // <CHANGE> Función para mostrar los datos del usuario creado
+    function displayUserData(usuario) {
+      const userDataContainer = document.getElementById('userDataContainer');
+      const userDataContent = document.getElementById('userDataContent');
+
+      // Crear HTML para mostrar los datos
+      let dataHTML = '';
+
+      if (usuario.nombre) {
+        dataHTML += `
+          <div class="user-data-item">
+            <span class="user-data-label">Nombre:</span>
+            <span class="user-data-value">${usuario.nombre}</span>
+          </div>
+        `;
+      }
+
+      if (usuario.email) {
+        dataHTML += `
+          <div class="user-data-item">
+            <span class="user-data-label">Email:</span>
+            <span class="user-data-value">${usuario.email}</span>
+          </div>
+        `;
+      }
+
+      // Agregar timestamp si está disponible
+      dataHTML += `
+        <div class="user-data-item">
+          <span class="user-data-label">Creado:</span>
+          <span class="user-data-value">${new Date().toLocaleString('es-ES')}</span>
+        </div>
+      `;
+
+      userDataContent.innerHTML = dataHTML;
+      userDataContainer.style.display = 'block';
+    }
+
+    // <CHANGE> Función para mostrar la lista de usuarios
+    async function loadUsers() {
+      const viewUsersBtn = document.getElementById('viewUsersBtn');
+      const usersListContainer = document.getElementById('usersListContainer');
+      const errorMessage = document.getElementById('errorMessage');
+
+      // Mostrar estado de carga
+      viewUsersBtn.classList.add('loading');
+      viewUsersBtn.querySelector('.button-text').textContent = 'Cargando Usuarios...';
+
+      // Ocultar mensajes anteriores
+      errorMessage.style.display = 'none';
+
+      try {
+        // Hacer GET request a /usuarios
+        const response = await fetch('/usuarios', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al cargar usuarios');
+        }
+
+        const users = await response.json();
+        displayUsersList(users);
+
+      } catch (error) {
+        console.error('Error:', error);
+        errorMessage.textContent = 'Error al cargar usuarios: ' + error.message;
+        errorMessage.style.display = 'block';
+      } finally {
+        // Restaurar botón
+        viewUsersBtn.classList.remove('loading');
+        viewUsersBtn.querySelector('.button-text').textContent = 'Ver Usuarios';
+      }
+    }
+
+    // <CHANGE> Función para mostrar la lista de usuarios
+    function displayUsersList(users) {
+      const usersListContainer = document.getElementById('usersListContainer');
+      const usersListContent = document.getElementById('usersListContent');
+      const usersCount = document.getElementById('usersCount');
+
+      // Actualizar contador
+      usersCount.textContent = users.length;
+
+      if (users.length === 0) {
+        usersListContent.innerHTML = '<div class="empty-users">No hay usuarios registrados</div>';
+      } else {
+        // Crear HTML para cada usuario
+        let usersHTML = '';
+        users.forEach((user, index) => {
+          usersHTML += `
+            <div class="user-card">
+              <div class="user-name">${user.nombre || 'Sin nombre'}</div>
+              <div class="user-email">${user.email || 'Sin email'}</div>
+            </div>
+          `;
+        });
+
+        usersListContent.innerHTML = usersHTML;
+      }
+
+      // Mostrar contenedor
+      usersListContainer.style.display = 'block';
+
+      // Scroll suave hacia la lista
+      usersListContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // <CHANGE> Función para ocultar la lista de usuarios
+    function hideUsers() {
+      const usersListContainer = document.getElementById('usersListContainer');
+      usersListContainer.style.display = 'none';
+    }
+
+    // <CHANGE> Modificando función resetForm para también ocultar lista de usuarios
+    function resetForm() {
+      document.getElementById('userForm').reset();
+      document.getElementById('successMessage').style.display = 'none';
+      document.getElementById('errorMessage').style.display = 'none';
+      document.getElementById('userDataContainer').style.display = 'none';
+      document.getElementById('usersListContainer').style.display = 'none';
+    }
+  </script>
 </body>
+
 </html>
